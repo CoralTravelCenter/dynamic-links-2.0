@@ -42,6 +42,16 @@ const filters: Record<string, Filter> = {
         values: [{id: '5', value: '5', parent: null}],
         providers: null,
     },
+    '4stars': {
+        type: 2,
+        values: [{id: '4', value: '4', parent: null}],
+        providers: null,
+    },
+    '3stars': {
+        type: 2,
+        values: [{id: '3', value: '3', parent: null}],
+        providers: null,
+    },
     privatebeach: {
         type: 6,
         values: [{id: '32', value: '32', parent: null}],
@@ -52,8 +62,14 @@ const filters: Record<string, Filter> = {
     },
 };
 
-export function addFilters(filterStr: string, filterMap = filters): any[] {
-    const selectedFilters: any[] = [filterMap.available]; // всегда добавляем "доступные"
+/**
+ * Добавляет выбранные фильтры в запрос
+ * @param filterStr Строка с фильтрами, разделенными запятой (например: "5stars,4stars,ai")
+ * @param filterMap Карта доступных фильтров
+ * @returns Массив выбранных фильтров
+ */
+export function addFilters(filterStr: string, filterMap = filters): Filter[] {
+    const selectedFilters: Filter[] = [filterMap.available]; // всегда добавляем "доступные"
 
     if (!filterStr) return selectedFilters;
 
@@ -61,9 +77,13 @@ export function addFilters(filterStr: string, filterMap = filters): any[] {
         .split(',')
         .map(f => f.trim().toLowerCase());
 
+    // Создаем набор для предотвращения дублирования фильтров
+    const addedFilterTypes = new Set<number>([21]); // 21 - тип фильтра "available"
+
     for (const key of requestedKeys) {
-        if (filterMap[key]) {
+        if (filterMap[key] && !addedFilterTypes.has(filterMap[key].type)) {
             selectedFilters.push(filterMap[key]);
+            addedFilterTypes.add(filterMap[key].type);
         }
     }
 

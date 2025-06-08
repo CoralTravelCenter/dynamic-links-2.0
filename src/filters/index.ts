@@ -42,6 +42,16 @@ export const filters: Record<string, Filter> = {
         values: [{id: '5', value: '5', parent: null}],
         providers: null,
     },
+    '4stars': {
+        type: 2,
+        values: [{id: '4', value: '4', parent: null}],
+        providers: null,
+    },
+    '3stars': {
+        type: 2,
+        values: [{id: '3', value: '3', parent: null}],
+        providers: null,
+    },
     privatebeach: {
         type: 6,
         values: [{id: '32', value: '32', parent: null}],
