@@ -27,14 +27,14 @@ export function handleOnlyHotelClick(target: HTMLElement): void {
 
     const depth = Number(target.getAttribute('data-onlyhotel-lookup-depth-days') ?? 14);
     const nights = Number(target.getAttribute('data-onlyhotel-lookup-nights') ?? 7);
-    
+
     // Поддержка нескольких фильтров, например: "5stars,4stars,ai"
     const filter = target.getAttribute('data-onlyhotel-lookup-filter') ?? null;
 
     // Можно указать дату начала, иначе используем дефолтное значение
     const startDateStr = target.getAttribute('data-onlyhotel-lookup-start-date');
     let start = new Date();
-    
+
     if (startDateStr) {
         try {
             start = new Date(startDateStr);
@@ -55,7 +55,5 @@ export function handleOnlyHotelClick(target: HTMLElement): void {
     end.setDate(end.getDate() + nights);
 
     const beginDates: [string, string] = [formatDate(start), formatDate(end)];
-
-    console.log(`Looking for hotels: ${hotelNames.join(', ')} with filters: ${filter}`);
     goToOnlyHotelModern(hotelNames, nights, beginDates, filter);
 }
