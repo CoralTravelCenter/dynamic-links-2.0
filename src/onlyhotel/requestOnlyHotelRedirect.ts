@@ -4,7 +4,7 @@ import {OnlyHotelPriceSearchEncryptResponse} from "../types";
 
 export async function requestOnlyHotelRedirect(payload: any): Promise<string> {
     const res = await doRequestToServer<OnlyHotelPriceSearchEncryptResponse>(
-        '/OnlyHotelProduct/PriceSearchEncrypt',
+        '/OnlyHotelProduct/PriceSearchList',
         payload,
         'POST'
     );

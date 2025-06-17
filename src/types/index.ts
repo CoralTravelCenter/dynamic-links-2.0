@@ -1,40 +1,3 @@
-export interface OnlyHotelArrivalLocationPayload {
-    text: string,
-    locationTypes?: number[]
-}
-
-export interface OnlyHotelArrivalLocationResponse {
-    result: {
-        locations: LocationItem[];
-    };
-    meta?: Meta
-}
-
-export interface OnlyHotelPriceSearchEncryptPayload {
-    reservationType: number;
-    beginDates: string[];
-    nights: Night[];
-    roomCriterias: RoomCriteria[];
-    arrivalLocations: ArrivalLocation[];
-    paging: Paging;
-    imageSizes: number[];
-    categories: Category[];
-    additionalFilters: AdditionalFilter[];
-}
-
-export interface OnlyHotelPriceSearchEncryptResponse {
-    meta?: RedirectionMeta;
-    result: RedirectionResult;
-}
-
-export interface LocationItem {
-    id: string;
-    type: number;
-    name: string;
-    friendlyUrl: string;
-    parent: ParentLocation;
-}
-
 interface ParentLocation {
     id: string;
     type: number;
@@ -62,17 +25,6 @@ interface Passenger {
     passengerType: number;
     age: number;
     birthDate?: string;
-}
-
-export interface ArrivalLocation {
-    id: string;
-    type: number;
-    name: string;
-    friendlyUrl: string;
-    tourId?: number;
-    transportPointId?: number;
-    parent: ParentLocation;
-    children: string[] | null;
 }
 
 interface Paging {
@@ -123,4 +75,49 @@ interface RedirectionMessage {
 interface RedirectionResult {
     redirectionUrl: string;
     queryParam: string;
+}
+
+export interface ArrivalLocation {
+    id: string;
+    type: number;
+    name?: string;
+    friendlyUrl?: string;
+    parent?: ParentLocation;
+}
+
+export interface OnlyHotelArrivalLocationPayload {
+    text: string,
+    locationTypes?: number[]
+}
+
+export interface OnlyHotelArrivalLocationResponse {
+    result: {
+        locations: LocationItem[];
+    };
+    meta?: Meta
+}
+
+export interface OnlyHotelPriceSearchEncryptPayload {
+    reservationType: number;
+    beginDates: string[];
+    nights: Night[];
+    roomCriterias: RoomCriteria[];
+    arrivalLocations: ArrivalLocation[];
+    paging: Paging;
+    imageSizes: number[];
+    categories: Category[];
+    additionalFilters: AdditionalFilter[];
+}
+
+export interface OnlyHotelPriceSearchEncryptResponse {
+    meta?: RedirectionMeta;
+    result: RedirectionResult;
+}
+
+export interface LocationItem {
+    id: string;
+    type: number;
+    name: string;
+    friendlyUrl: string;
+    parent: ParentLocation;
 }

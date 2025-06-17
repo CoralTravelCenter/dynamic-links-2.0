@@ -9,16 +9,10 @@ export function handleOnlyHotelClick(target: HTMLElement): void {
         return;
     }
 
-    let hotelNames: string[] = [];
+    let hotelNames: string[];
 
-    // Обработка нескольких отелей, разделенных запятыми или точкой с запятой
-    if (raw.includes(';')) {
-        // Если использована точка с запятой, используем ее как основной разделитель
-        hotelNames = raw.split(';').map(s => s.trim()).filter(Boolean);
-    } else {
-        // Иначе используем запятую как разделитель
-        hotelNames = raw.split(',').map(s => s.trim()).filter(Boolean);
-    }
+    // Обработка нескольких отелей, разделенных запятыми
+    hotelNames = raw.split(',').map(s => s.trim()).filter(Boolean);
 
     if (!hotelNames.length) {
         console.warn('No valid hotel names provided');
@@ -32,25 +26,8 @@ export function handleOnlyHotelClick(target: HTMLElement): void {
     const filter = target.getAttribute('data-onlyhotel-lookup-filter') ?? null;
 
     // Можно указать дату начала, иначе используем дефолтное значение
-    const startDateStr = target.getAttribute('data-onlyhotel-lookup-start-date');
     let start = new Date();
-
-    if (startDateStr) {
-        try {
-            start = new Date(startDateStr);
-            if (isNaN(start.getTime())) {
-                // Если дата некорректная, используем текущую дату + depth
-                start = new Date();
-                start.setDate(start.getDate() + depth);
-            }
-        } catch {
-            start = new Date();
-            start.setDate(start.getDate() + depth);
-        }
-    } else {
-        start.setDate(start.getDate() + depth);
-    }
-
+    start.setDate(start.getDate() + depth);
     const end = new Date(start);
     end.setDate(end.getDate() + nights);
 

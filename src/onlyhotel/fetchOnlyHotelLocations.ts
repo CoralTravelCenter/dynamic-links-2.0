@@ -7,7 +7,7 @@ export async function fetchOnlyHotelLocations(names: string | string[]): Promise
     const allResults = await Promise.all(
         searchList.map(name =>
             doRequestToServer<OnlyHotelArrivalLocationResponse>(
-                '/OnlyHotelProduct/ListArrivalLocations',
+                '/OnlyHotelProduct/PriceSearchEncrypt',
                 {text: name},
                 'POST'
             )
@@ -35,6 +35,7 @@ export async function fetchOnlyHotelLocations(names: string | string[]): Promise
             filtered.push(loc);
         }
     }
-    
+
+    console.log(filtered);
     return filtered;
 }
