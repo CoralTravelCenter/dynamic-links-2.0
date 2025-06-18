@@ -1,14 +1,17 @@
-import {doRequestToServer} from "../api";
-import {OnlyHotelPriceSearchEncryptResponse} from "../types";
+import { fetchOnlyHotelLocations } from "./fetchOnlyHotelArrivalLocations";
+import { fetchPriceSearchEncrypt } from "./fetchPriceSearchEncrypt";
 
+export async function requestOnlyHotelRedirect(
+	hotelNames: string[],
+	dates: string[],
+	nights: number,
+	filters: string | null,
+) {
+	console.trace("requestOnlyHotelRedirect called");
+	const locations = await fetchOnlyHotelLocations(hotelNames);
+	const qp = await fetchPriceSearchEncrypt(locations, dates, nights, filters);
+	console.log(qp);
 
-export async function requestOnlyHotelRedirect(payload: any): Promise<string> {
-    const res = await doRequestToServer<OnlyHotelPriceSearchEncryptResponse>(
-        '/OnlyHotelProduct/PriceSearchList',
-        payload,
-        'POST'
-    );
-
-    const {redirectionUrl, queryParam} = res.result;
-    return `${redirectionUrl}?qp=${queryParam}`; // p=2 означает onlyHotel
+	const { redirectionUrl, queryParam } = qp.result;
+	return `${redirectionUrl}?qp=${queryParam}`;
 }
