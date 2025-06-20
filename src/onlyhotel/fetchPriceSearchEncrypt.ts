@@ -26,5 +26,5 @@ export async function fetchPriceSearchEncrypt(
         imageSizes: [0],
         categories: [],
     };
-    await doRequestToServer(onlyHotelEndPoints.PriceSearchEncrypt, payload, "POST");
+    return await doRequestToServer(onlyHotelEndPoints.priceSearchEncrypt, payload, "POST");
 }

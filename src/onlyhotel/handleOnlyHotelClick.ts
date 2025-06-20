@@ -2,7 +2,7 @@ import {defaultDepthDays, defaultNights} from "../constants";
 import {formatDate} from "../utils";
 import {requestOnlyHotelRedirect} from "./requestOnlyHotelRedirect";
 
-export async function handleOnlyHotelClick(target: HTMLElement): Promise<any> {
+export function handleOnlyHotelClick(target: HTMLElement) {
     // Получаем названия отелей, или отеля, из атрибута
     const raw = target.getAttribute("data-onlyhotel-lookup-destination-2");
 
@@ -41,8 +41,7 @@ export async function handleOnlyHotelClick(target: HTMLElement): Promise<any> {
 
     // Выполняем запрос на редирект
     try {
-        const url: string = await requestOnlyHotelRedirect(hotelNames, dates, nights, filters);
-        window.open(url, "_blank");
+        requestOnlyHotelRedirect(hotelNames, dates, nights, filters).then(url => window.open(url, "_blank"))
     } catch (error) {
         console.error("Failed to redirect to OnlyHotel:", error);
     }

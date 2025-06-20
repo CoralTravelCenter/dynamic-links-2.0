@@ -1,6 +1,6 @@
 export const onlyHotelEndPoints = {
     listArrivalLocations: "/OnlyHotelProduct/ListArrivalLocations",
-    PriceSearchEncrypt: "/OnlyHotelProduct/PriceSearchEncrypt",
+    priceSearchEncrypt: "/OnlyHotelProduct/PriceSearchEncrypt",
 };
 
 function endpointUrl(endpoint: string): string {
@@ -17,19 +17,24 @@ export async function doRequestToServer<T, U>(
     data: U,
     method: "POST" | "GET" = "POST",
 ): Promise<T> {
-    const url = endpointUrl(endpoint);
+    try {
+        const url = endpointUrl(endpoint);
 
-    const response = await fetch(url, {
-        method,
-        headers: {
-            "Content-Type": "application/json;charset=utf-8",
-        },
-        body: JSON.stringify(data),
-    });
+        const response = await fetch(url, {
+            method,
+            headers: {
+                "Content-Type": "application/json;charset=utf-8",
+            },
+            body: JSON.stringify(data),
+        });
 
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
+
+        return (await response.json()) as T;
+    } catch (error) {
+        console.error(`Error in doRequestToServer for endpoint ${endpoint}:, error`);
+        throw error;
     }
-
-    return (await response.json()) as T;
 }

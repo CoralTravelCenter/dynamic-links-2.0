@@ -8,9 +8,7 @@ export async function requestOnlyHotelRedirect(
     filters: string | null,
 ) {
     const locations = await fetchOnlyHotelLocations(hotelNames);
-    console.log(locations)
     const qp = await fetchPriceSearchEncrypt(locations, dates, nights, filters);
-    console.log(qp);
 
     const {redirectionUrl, queryParam} = qp.result;
     return `${redirectionUrl}?qp=${queryParam}`;
