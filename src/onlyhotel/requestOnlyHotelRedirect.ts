@@ -1,17 +1,17 @@
-import { fetchOnlyHotelLocations } from "./fetchOnlyHotelArrivalLocations";
-import { fetchPriceSearchEncrypt } from "./fetchPriceSearchEncrypt";
+import {fetchOnlyHotelLocations} from "./fetchOnlyHotelArrivalLocations";
+import {fetchPriceSearchEncrypt} from "./fetchPriceSearchEncrypt";
 
 export async function requestOnlyHotelRedirect(
-	hotelNames: string[],
-	dates: string[],
-	nights: number,
-	filters: string | null,
+    hotelNames: string[],
+    dates: string[],
+    nights: number,
+    filters: string | null,
 ) {
-	console.trace("requestOnlyHotelRedirect called");
-	const locations = await fetchOnlyHotelLocations(hotelNames);
-	const qp = await fetchPriceSearchEncrypt(locations, dates, nights, filters);
-	console.log(qp);
+    const locations = await fetchOnlyHotelLocations(hotelNames);
+    console.log(locations)
+    const qp = await fetchPriceSearchEncrypt(locations, dates, nights, filters);
+    console.log(qp);
 
-	const { redirectionUrl, queryParam } = qp.result;
-	return `${redirectionUrl}?qp=${queryParam}`;
+    const {redirectionUrl, queryParam} = qp.result;
+    return `${redirectionUrl}?qp=${queryParam}`;
 }
