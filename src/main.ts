@@ -11,7 +11,7 @@ import {handleOnlyHotelClick} from "./onlyhotel/handleOnlyHotelClick";
     <div class="test-buttons-container" style="display: flex; gap: 10px; margin: 10px;">
         <a href="#"
            class="test-btn"
-           data-onlyhotel-lookup-destination-2="XANADU MAKADI BAY, XANADU RESORT, XANADU ISLAND HOTEL"
+           data-onlyhotel-lookup-destination-2="Турция"
            >
            5★ Отели
         </a>
