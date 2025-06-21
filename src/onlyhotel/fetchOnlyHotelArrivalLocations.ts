@@ -1,52 +1,65 @@
-import {ArrivalLocation} from "../types";
+import {ArrivalLocation, OnlyHotelArrivalLocationResponse} from "../types";
 import {doRequestToServer, onlyHotelEndPoints} from "../api";
+import {filterUniqueMatchingHotels} from "./filterUniqueMatchingHotels";
 
-export async function fetchOnlyHotelLocations(names: string[]): Promise<ArrivalLocation[]> {
+function mapCountry(item: any) {
+    return {
+        id: item.id,
+        name: item.name,
+        friendlyUrl: item.friendlyUrl,
+        type: item.type,
+    };
+}
+
+function mapHotel(item: any) {
+    return {
+        id: item.id.split("-")[0],
+        type: item.type,
+        name: item.name,
+        friendlyUrl: item.friendlyUrl,
+        tourId: 0,
+        transportPointId: 0,
+        parent: {
+            id: item.parent.id,
+            type: item.type,
+            name: item.parent.name,
+            countryId: item.parent.countryId,
+        },
+        children: [],
+    };
+}
+
+export async function fetchOnlyHotelLocations(hotelNames: string[]): Promise<ArrivalLocation[]> {
     // Выполняем параллельные запросы к API, для каждого названия отеля
     const responses = await Promise.all(
-        names.map((name) =>
+        hotelNames.map((name) =>
             doRequestToServer(
                 onlyHotelEndPoints.listArrivalLocations,
                 {text: name},
                 "POST",
             ),
         ),
-    );
+    ) as OnlyHotelArrivalLocationResponse[];
 
-    // Объединяем все результаты запросов и фильтруем только те отели,
-    // названия которых точно соответствуют искомым (без учета регистра и пробелов)
-    const filteredLocations = responses.flatMap((response) => {
-        const locations = response.result.locations;
-        return locations.filter((hotel) =>
-            names.some((name) => hotel.name.trim().toUpperCase() === name.trim().toUpperCase()),
-        );
-    });
-
-    // Убираем дубликаты по ID
-    const uniqueLocationsMap = new Map();
-    filteredLocations.forEach((hotel) => {
-        if (!uniqueLocationsMap.has(hotel.id)) {
-            uniqueLocationsMap.set(hotel.id, hotel);
-        }
-    });
+    const uniqueLocations = filterUniqueMatchingHotels(responses, hotelNames);
+    console.log(uniqueLocations);
 
     // Преобразуем данные в нужный формат ArrivalLocation
-    // Извлекаем первую часть ID до дефиса (если дефис присутствует)
-    return Array.from(uniqueLocationsMap.values()).map(
-        (hotel) => ({
-            id: hotel.id.split("-")[0],
-            type: hotel.type,
-            name: hotel.name,
-            friendlyUrl: hotel.friendlyUrl,
-            tourId: 0,
-            transportPointId: 0,
-            parent: {
-                id: hotel.parent.id,
-                type: hotel.type,
-                name: hotel.parent.name,
-                countryId: hotel.parent.countryId,
-            },
-            children: [],
-        }),
-    );
+    return uniqueLocations.map((item) => {
+        let result;
+
+        switch (item.type) {
+            case 0:
+                result = mapCountry(item);
+                break;
+            case 7:
+                result = mapHotel(item);
+                break;
+            default:
+                console.warn(`Необработанный тип: ${item.type}`, item);
+                result = null;
+        }
+
+        return result;
+    }).filter(Boolean);
 }
