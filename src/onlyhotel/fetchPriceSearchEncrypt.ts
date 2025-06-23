@@ -1,57 +1,104 @@
-import {doRequestToServer, onlyHotelEndPoints} from "../api";
-import {ArrivalLocation, HotelPayload, OnlyHotelPriceSearchEncryptResponse} from "../types";
-import {addFilters} from "../utils";
+import { doRequestToServer, ONLY_HOTEL_ENDPOINTS } from "../api";
+import {
+	ArrivalLocation,
+	OnlyHotelPriceSearchEncryptResponse,
+	OnlyHotelPriceSearchEncryptPayload,
+	isHotelLocation,
+} from "../types";
+import { addFilters } from "../utils";
+import { API_CONFIG } from "../constants";
 
-function buildPayloadForHotel({beginDates, arrivalLocations, nights, additionalFilters}: HotelPayload) {
-    return {
-        beginDates: beginDates,
-        arrivalLocations: arrivalLocations,
-        nights: [{value: parseInt(nights)}],
-        roomCriterias: [
-            {
-                passengers: [
-                    {age: 20, passengerType: 0},
-                    {age: 20, passengerType: 0},
-                ],
-            },
-        ],
-        reservationType: 2,
-        paging: {pageNumber: 1, pageSize: 20, sortType: 0},
-        additionalFilters: addFilters(additionalFilters),
-        imageSizes: [0],
-        categories: [],
-    };
+/**
+ * Создает payload для поиска по конкретным отелям
+ */
+function buildPayloadForHotel(
+	locations: ArrivalLocation[],
+	dates: string[],
+	nights: number,
+	filters: string | null,
+): OnlyHotelPriceSearchEncryptPayload {
+	return {
+		beginDates: dates,
+		arrivalLocations: locations,
+		nights: [{ value: nights }],
+		roomCriterias: [
+			{
+				passengers: [...API_CONFIG.DEFAULT_PASSENGERS],
+			},
+		],
+		reservationType: API_CONFIG.DEFAULT_RESERVATION_TYPE,
+		paging: {
+			pageNumber: 1,
+			pageSize: API_CONFIG.DEFAULT_PAGE_SIZE,
+			sortType: API_CONFIG.DEFAULT_SORT_TYPE,
+		},
+		additionalFilters: addFilters(filters),
+		imageSizes: [...API_CONFIG.DEFAULT_IMAGE_SIZES],
+		categories: [],
+	};
 }
 
-function buildPayloadForCountry(locations: ArrivalLocation[], dates: string[], nights: string, filters: string | null) {
-    return {
-        beginDates: dates,
-        arrivalLocations: locations,
-        nights: [{value: parseInt(nights)}],
-        roomCriterias: [
-            {
-                passengers: [
-                    {age: 20, passengerType: 0},
-                    {age: 20, passengerType: 0},
-                ],
-            },
-        ],
-        reservationType: 2,
-        paging: {pageNumber: 1, pageSize: 20, sortType: 0},
-        additionalFilters: addFilters(filters),
-        imageSizes: [0],
-        categories: [],
-    };
+/**
+ * Создает payload для поиска по странам
+ */
+function buildPayloadForCountry(
+	locations: ArrivalLocation[],
+	dates: string[],
+	nights: number,
+	filters: string | null,
+): OnlyHotelPriceSearchEncryptPayload {
+	return {
+		beginDates: dates,
+		arrivalLocations: locations,
+		nights: [{ value: nights }],
+		roomCriterias: [
+			{
+				passengers: [...API_CONFIG.DEFAULT_PASSENGERS],
+			},
+		],
+		reservationType: API_CONFIG.DEFAULT_RESERVATION_TYPE,
+		paging: {
+			pageNumber: 1,
+			pageSize: API_CONFIG.DEFAULT_PAGE_SIZE,
+			sortType: API_CONFIG.DEFAULT_SORT_TYPE,
+		},
+		additionalFilters: addFilters(filters),
+		imageSizes: [...API_CONFIG.DEFAULT_IMAGE_SIZES],
+		categories: [],
+	};
 }
 
+/**
+ * Получает зашифрованные данные поиска цен для бронирования OnlyHotel
+ *
+ * @param locations - Массив локаций прибытия (отели или страны)
+ * @param dates - Массив дат поиска в формате YYYY-MM-DD
+ * @param nights - Количество ночей для проживания
+ * @param filters - Опциональная строка фильтров через запятую
+ * @returns Promise, разрешающийся в ответ с зашифрованным поиском цен
+ * @throws Error если массив локаций пуст или API запрос не удался
+ */
 export async function fetchPriceSearchEncrypt(
-    locations: ArrivalLocation[] | any,
-    dates: string[],
-    nights: number,
-    filters: string | null,
+	locations: ArrivalLocation[],
+	dates: string[],
+	nights: number,
+	filters: string | null,
 ): Promise<OnlyHotelPriceSearchEncryptResponse> {
-    const payload = locations.type === 7
-        ? buildPayloadForHotel(locations, dates, nights, filters)
-        : buildPayloadForCountry(locations, dates, nights, filters);
-    return await doRequestToServer(onlyHotelEndPoints.priceSearchEncrypt, payload, "POST");
+	if (!locations.length) {
+		throw new Error("Locations array cannot be empty");
+	}
+
+	if (!dates.length) {
+		throw new Error("Dates array cannot be empty");
+	}
+
+	const hasHotelLocation = locations.some(isHotelLocation);
+	const payload = hasHotelLocation
+		? buildPayloadForHotel(locations, dates, nights, filters)
+		: buildPayloadForCountry(locations, dates, nights, filters);
+
+	return await doRequestToServer<
+		OnlyHotelPriceSearchEncryptResponse,
+		OnlyHotelPriceSearchEncryptPayload
+	>(ONLY_HOTEL_ENDPOINTS.PRICE_SEARCH_ENCRYPT, payload, "POST");
 }

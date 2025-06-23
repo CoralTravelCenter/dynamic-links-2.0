@@ -1,30 +1,37 @@
-import { defaultDepthDays, defaultNights } from "../constants";
+import { defaultDepthDays, defaultNights, HTML_ATTRIBUTES } from "../constants";
+import { OnlyHotelSearchParams } from "../types";
+import { parseIntSafe } from "../utils";
 
 /**
- * Извлекает параметры запроса к OnlyHotel из атрибутов HTML-элемента.
- * Проверяет наличие и валидность названий отелей, глубины поиска и количества ночей.
+ * Извлекает параметры поиска OnlyHotel из атрибутов HTML элемента
+ *
+ * @param target - HTML anchor элемент с data атрибутами
+ * @returns Объект с параметрами поиска OnlyHotel
+ * @throws Error если обязательный атрибут destination отсутствует или невалидный
  */
-export function extractOnlyHotelParams(target: HTMLLinkElement) {
-	const raw = target.getAttribute("data-onlyhotel-lookup-destination-2");
-	if (!raw) throw new Error("data-onlyhotel-lookup-destination is required");
+export function extractOnlyHotelParams(target: HTMLAnchorElement): OnlyHotelSearchParams {
+	const destinationRaw = target.getAttribute(HTML_ATTRIBUTES.DESTINATION);
+	if (!destinationRaw) {
+		throw new Error(`Required attribute ${HTML_ATTRIBUTES.DESTINATION} is missing`);
+	}
 
-	// Разбивает строку с названиями отелей по запятой и очищает пробелы
-	const hotelNames = raw
+	// Парсим названия отелей из строки через запятую
+	const hotelNames = destinationRaw
 		.split(",")
-		.map((s) => s.trim())
+		.map((name) => name.trim())
 		.filter(Boolean);
-	if (!hotelNames.length) throw new Error("No valid hotel names provided");
 
-	// Получает глубину поиска и количество ночей, с fallback на значения по умолчанию
-	const depthAttr = target.getAttribute("data-onlyhotel-lookup-depth-days-2");
-	const nightsAttr = target.getAttribute("data-onlyhotel-lookup-nights-2");
+	if (!hotelNames.length) {
+		throw new Error("No valid hotel names provided in destination attribute");
+	}
 
-	const depth = Number(depthAttr) || defaultDepthDays;
-	const nights = Number(nightsAttr) || defaultNights;
+	// Извлекаем опциональные параметры с безопасным парсингом
+	const depthAttr = target.getAttribute(HTML_ATTRIBUTES.DEPTH_DAYS);
+	const nightsAttr = target.getAttribute(HTML_ATTRIBUTES.NIGHTS);
+	const filters = target.getAttribute(HTML_ATTRIBUTES.FILTER) ?? null;
 
-	// Дополнительные фильтры поиска (если указаны)
-	const filters =
-		target.getAttribute("data-onlyhotel-lookup-filter-2") ?? null;
+	const depth = parseIntSafe(depthAttr, defaultDepthDays);
+	const nights = parseIntSafe(nightsAttr, defaultNights);
 
 	return { hotelNames, depth, nights, filters };
 }

@@ -1,18 +1,30 @@
-import {extractOnlyHotelParams} from "./extractOnlyHotelParams";
-import {calculateDates} from "./calculateDates";
-import {redirectToOnlyHotel} from "./redirectToOnlyHotel";
+import { extractOnlyHotelParams } from "./extractOnlyHotelParams";
+import { calculateDates } from "./calculateDates";
+import { redirectToOnlyHotel } from "./redirectToOnlyHotel";
 
 /**
- * Обработчик клика по элементу "только отели".
- * Извлекает параметры, рассчитывает даты и вызывает редирект.
+ * Обрабатывает событие клика по кнопке поиска OnlyHotel
+ * Извлекает параметры поиска, вычисляет даты и инициирует редирект
+ *
+ * @param target - HTML anchor элемент, по которому был выполнен клик
  */
-export async function handleOnlyHotelClick(target: HTMLLinkElement) {
-    try {
-        const {hotelNames, depth, nights, filters} = extractOnlyHotelParams(target);
-        console.log(hotelNames, depth, nights, filters)
-        const dates = calculateDates(depth, nights);
-        await redirectToOnlyHotel(hotelNames, dates, nights, filters);
-    } catch (error) {
-        console.error("Failed to handle OnlyHotel click:", error);
-    }
+export async function handleOnlyHotelClick(target: HTMLAnchorElement): Promise<void> {
+	if (!target || !(target instanceof HTMLAnchorElement)) {
+		return;
+	}
+
+	try {
+		// Извлекаем и валидируем параметры поиска из DOM элемента
+		const searchParams = extractOnlyHotelParams(target);
+		const { hotelNames, depth, nights, filters } = searchParams;
+
+		// Вычисляем даты поездки на основе глубины и продолжительности
+		const dates = calculateDates(depth, nights);
+
+		// Выполняем редирект на страницу бронирования OnlyHotel
+		await redirectToOnlyHotel(hotelNames, dates, nights, filters);
+	} catch (error) {
+		// Тихо обрабатываем ошибку без показа пользователю
+		// В production здесь можно добавить отправку ошибки в систему мониторинга
+	}
 }

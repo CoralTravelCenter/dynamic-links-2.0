@@ -5,6 +5,11 @@ interface ParentLocation {
 	countryId: string;
 }
 
+// Utility types
+export type LocationType = 0 | 7; // 0 = Country, 7 = Hotel
+export type ReservationType = 1 | 2; // 1 = Package, 2 = OnlyHotel
+export type PassengerType = 0 | 1; // 0 = Adult, 1 = Child
+
 interface Meta {
 	responseDateTime: string; // ISO 8601
 	elapsedTime: string; // Format: HH:mm:ss
@@ -101,7 +106,7 @@ export interface OnlyHotelArrivalLocationResponse {
 }
 
 export interface OnlyHotelPriceSearchEncryptPayload {
-	reservationType: number;
+	reservationType: ReservationType;
 	beginDates: string[];
 	nights: Night[];
 	roomCriterias: RoomCriteria[];
@@ -109,6 +114,24 @@ export interface OnlyHotelPriceSearchEncryptPayload {
 	imageSizes: number[];
 	categories: Category[];
 	additionalFilters: Filter[];
+	arrivalLocations?: ArrivalLocation[];
+	departureLocations?: string[];
+}
+
+// Search parameters extracted from DOM
+export interface OnlyHotelSearchParams {
+	hotelNames: string[];
+	depth: number;
+	nights: number;
+	filters: string | null;
+}
+
+// Configuration for OnlyHotel button
+export interface OnlyHotelButtonConfig {
+	destination: string;
+	filter?: string;
+	depthDays: number;
+	nights: number;
 }
 
 export interface OnlyHotelPriceSearchEncryptResponse {
@@ -128,3 +151,7 @@ export interface HotelPayload extends OnlyHotelPriceSearchEncryptPayload {
 export interface CountryPayload extends OnlyHotelPriceSearchEncryptPayload {
 	departureLocations: string[];
 }
+
+// Type guards
+export const isCountryLocation = (location: ArrivalLocation): boolean => location.type === 0;
+export const isHotelLocation = (location: ArrivalLocation): boolean => location.type === 7;
