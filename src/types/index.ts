@@ -40,12 +40,6 @@ interface Category {
 	type: number;
 }
 
-interface AdditionalFilter {
-	type: number;
-	values: FilterValue[];
-	providers: string[] | null;
-}
-
 interface FilterValue {
 	id: string;
 	value: string;
@@ -91,7 +85,7 @@ export interface ArrivalLocation {
 	name: string;
 	friendlyUrl: string;
 	parent: ParentLocation;
-	children: [];
+	children: any[];
 }
 
 export interface OnlyHotelArrivalLocationPayload {
@@ -111,11 +105,10 @@ export interface OnlyHotelPriceSearchEncryptPayload {
 	beginDates: string[];
 	nights: Night[];
 	roomCriterias: RoomCriteria[];
-	arrivalLocations: ArrivalLocation[];
 	paging: Paging;
 	imageSizes: number[];
 	categories: Category[];
-	additionalFilters: AdditionalFilter[];
+	additionalFilters: Filter[];
 }
 
 export interface OnlyHotelPriceSearchEncryptResponse {
@@ -124,6 +117,14 @@ export interface OnlyHotelPriceSearchEncryptResponse {
 }
 
 export interface ReservationTypeParam {
-	onlyHotel: string,
-	package: string,
+	onlyHotel: string;
+	package: string;
+}
+
+export interface HotelPayload extends OnlyHotelPriceSearchEncryptPayload {
+	arrivalLocations: ArrivalLocation[];
+}
+
+export interface CountryPayload extends OnlyHotelPriceSearchEncryptPayload {
+	departureLocations: string[];
 }

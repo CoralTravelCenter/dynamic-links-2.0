@@ -23,6 +23,7 @@ export function formatDate(date: Date): string {
 }
 
 export function addFilters(filterStr: string | null): Filter[] {
+    console.log(filterStr);
     const result: Filter[] = []; // всегда добавляем доступность
 
     if (!filterStr) return result;

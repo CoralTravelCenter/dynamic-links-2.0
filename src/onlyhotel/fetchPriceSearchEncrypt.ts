@@ -1,11 +1,11 @@
 import {doRequestToServer, onlyHotelEndPoints} from "../api";
-import {ArrivalLocation, OnlyHotelPriceSearchEncryptResponse} from "../types";
+import {ArrivalLocation, HotelPayload, OnlyHotelPriceSearchEncryptResponse} from "../types";
 import {addFilters} from "../utils";
 
-function buildPayloadForHotel(locations: ArrivalLocation[], dates: string[], nights: string, filters: string | null) {
+function buildPayloadForHotel({beginDates, arrivalLocations, nights, additionalFilters}: HotelPayload) {
     return {
-        beginDates: dates,
-        arrivalLocations: locations,
+        beginDates: beginDates,
+        arrivalLocations: arrivalLocations,
         nights: [{value: parseInt(nights)}],
         roomCriterias: [
             {
@@ -17,13 +17,13 @@ function buildPayloadForHotel(locations: ArrivalLocation[], dates: string[], nig
         ],
         reservationType: 2,
         paging: {pageNumber: 1, pageSize: 20, sortType: 0},
-        additionalFilters: addFilters(filters),
+        additionalFilters: addFilters(additionalFilters),
         imageSizes: [0],
         categories: [],
     };
 }
 
-function buildPayloadForCountry(locations: ArrivalLocation[], dates: string[], nights: number, filters: string | null) {
+function buildPayloadForCountry(locations: ArrivalLocation[], dates: string[], nights: string, filters: string | null) {
     return {
         beginDates: dates,
         arrivalLocations: locations,
