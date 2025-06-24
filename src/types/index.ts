@@ -5,11 +5,6 @@ interface ParentLocation {
 	countryId: string;
 }
 
-// Utility types
-export type LocationType = 0 | 7; // 0 = Country, 7 = Hotel
-export type ReservationType = 1 | 2; // 1 = Package, 2 = OnlyHotel
-export type PassengerType = 0 | 1; // 0 = Adult, 1 = Child
-
 interface Meta {
 	responseDateTime: string; // ISO 8601
 	elapsedTime: string; // Format: HH:mm:ss
@@ -52,13 +47,6 @@ interface FilterValue {
 	providers?: string[];
 }
 
-export interface Filter {
-	type: number;
-	values: FilterValue[];
-	providers: string[] | null;
-	parent?: FilterValue[];
-}
-
 interface RedirectionMeta {
 	responseDateTime: string; // ISO формат даты-времени
 	elapsedTime: string;
@@ -82,6 +70,13 @@ interface RedirectionMessage {
 interface RedirectionResult {
 	redirectionUrl: string;
 	queryParam: string;
+}
+
+export interface Filter {
+	type: number;
+	values: FilterValue[];
+	providers: string[] | null;
+	parent?: FilterValue[];
 }
 
 export interface ArrivalLocation {
@@ -126,6 +121,13 @@ export interface OnlyHotelSearchParams {
 	filters: string | null;
 }
 
+export interface PackageSearchParams {
+	destination: string;
+	depth: number;
+	nights: number;
+	filters: string | null;
+}
+
 // Configuration for OnlyHotel button
 export interface OnlyHotelButtonConfig {
 	destination: string;
@@ -152,6 +154,13 @@ export interface CountryPayload extends OnlyHotelPriceSearchEncryptPayload {
 	departureLocations: string[];
 }
 
+// Utility types
+export type LocationType = 0 | 7; // 0 = Country, 7 = Hotel
+export type ReservationType = 1 | 2; // 1 = Package, 2 = OnlyHotel
+export type PassengerType = 0 | 1; // 0 = Adult, 1 = Child
+
 // Type guards
-export const isCountryLocation = (location: ArrivalLocation): boolean => location.type === 0;
-export const isHotelLocation = (location: ArrivalLocation): boolean => location.type === 7;
+export const isCountryLocation = (location: ArrivalLocation): boolean =>
+	location.type === 0;
+export const isHotelLocation = (location: ArrivalLocation): boolean =>
+	location.type === 7;

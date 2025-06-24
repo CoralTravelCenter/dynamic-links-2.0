@@ -1,6 +1,9 @@
 import { hostReactAppReady } from "./utils";
 import { handleOnlyHotelClick } from "./onlyhotel/handleOnlyHotelClick";
-import { DOM_SELECTORS, HTML_ATTRIBUTES } from "./constants";
+import { handlePackageClick } from "./package";
+import { DOM_SELECTORS } from "./constants/common";
+import { ONLYHOTEL_HTML_ATTRIBUTES } from "./constants/onlyhotel";
+import { PACKAGE_HTML_ATTRIBUTES } from "./constants/package";
 
 /**
  * Конфигурация тестовой кнопки
@@ -10,6 +13,7 @@ interface TestButtonConfig {
 	destination: string;
 	filter?: string;
 	className?: string;
+	type?: "onlyhotel" | "package";
 }
 
 /**
@@ -17,16 +21,22 @@ interface TestButtonConfig {
  */
 function createTestButtonsHTML(buttons: TestButtonConfig[]): string {
 	const buttonsHTML = buttons
-		.map(
-			(button) => `
+		.map((button) => {
+			const isOnlyHotel = button.type === "onlyhotel" || !button.type;
+			const attributes = isOnlyHotel
+				? ONLYHOTEL_HTML_ATTRIBUTES
+				: PACKAGE_HTML_ATTRIBUTES;
+
+			return `
         <a href="#"
            class="test-btn ${button.className || ""}"
-           ${HTML_ATTRIBUTES.DESTINATION}="${button.destination}"
-           ${button.filter ? `${HTML_ATTRIBUTES.FILTER}="${button.filter}"` : ""}
+           ${attributes.DESTINATION}="${button.destination}"
+           ${button.filter ? `${attributes.FILTER}="${button.filter}"` : ""}
+           data-button-type="${button.type || "onlyhotel"}"
            >
            ${button.text}
-        </a>`,
-		)
+        </a>`;
+		})
 		.join("");
 
 	return `
@@ -38,7 +48,7 @@ function createTestButtonsHTML(buttons: TestButtonConfig[]): string {
 /**
  * Инициализирует тестовые кнопки и обработчики событий
  */
-async function initializeOnlyHotelApp(): Promise<void> {
+async function initializeDynamicLinksApp(): Promise<void> {
 	try {
 		// Ждем готовности React приложения
 		await hostReactAppReady();
@@ -48,18 +58,32 @@ async function initializeOnlyHotelApp(): Promise<void> {
 			{
 				text: "5★ Отели",
 				destination: "Турция",
-				filter: "elite",
+				filter: "cg",
+				type: "onlyhotel",
+			},
+			{
+				text: "Пакетные туры в Турцию",
+				destination: "Турция",
+				filter: "available",
+				type: "package",
 			},
 		];
 
 		// Вставляем тестовые кнопки в header
-		const headerElement = document.querySelector(DOM_SELECTORS.HEADER_CONTAINER);
+		const headerElement = document.querySelector(
+			DOM_SELECTORS.HEADER_CONTAINER,
+		);
 		if (headerElement) {
-			headerElement.insertAdjacentHTML("afterbegin", createTestButtonsHTML(testButtons));
+			headerElement.insertAdjacentHTML(
+				"afterbegin",
+				createTestButtonsHTML(testButtons),
+			);
 		}
 
 		// Добавляем обработчики событий к тестовым кнопкам
-		const testButtonElements = document.querySelectorAll(DOM_SELECTORS.TEST_BUTTON);
+		const testButtonElements = document.querySelectorAll(
+			DOM_SELECTORS.TEST_BUTTON,
+		);
 		testButtonElements.forEach((button) => {
 			button.addEventListener("click", handleButtonClick);
 		});
@@ -79,8 +103,14 @@ function handleButtonClick(event: Event): void {
 		return;
 	}
 
-	handleOnlyHotelClick(target);
+	const buttonType = target.getAttribute("data-button-type") || "onlyhotel";
+
+	if (buttonType === "package") {
+		handlePackageClick(target);
+	} else {
+		handleOnlyHotelClick(target);
+	}
 }
 
 // Инициализируем приложение
-initializeOnlyHotelApp();
+initializeDynamicLinksApp();

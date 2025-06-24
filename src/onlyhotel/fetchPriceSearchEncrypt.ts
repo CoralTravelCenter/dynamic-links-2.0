@@ -6,7 +6,7 @@ import {
 	isHotelLocation,
 } from "../types";
 import { addFilters } from "../utils";
-import { API_CONFIG } from "../constants";
+import { API_CONFIG, ONLYHOTEL_API_CONFIG } from "../constants";
 
 /**
  * Создает payload для поиска по конкретным отелям
@@ -26,13 +26,13 @@ function buildPayloadForHotel(
 				passengers: [...API_CONFIG.DEFAULT_PASSENGERS],
 			},
 		],
-		reservationType: API_CONFIG.DEFAULT_RESERVATION_TYPE,
+		reservationType: ONLYHOTEL_API_CONFIG.DEFAULT_RESERVATION_TYPE,
 		paging: {
 			pageNumber: 1,
 			pageSize: API_CONFIG.DEFAULT_PAGE_SIZE,
 			sortType: API_CONFIG.DEFAULT_SORT_TYPE,
 		},
-		additionalFilters: addFilters(filters),
+		additionalFilters: addFilters(filters, "onlyhotel"),
 		imageSizes: [...API_CONFIG.DEFAULT_IMAGE_SIZES],
 		categories: [],
 	};
@@ -56,13 +56,13 @@ function buildPayloadForCountry(
 				passengers: [...API_CONFIG.DEFAULT_PASSENGERS],
 			},
 		],
-		reservationType: API_CONFIG.DEFAULT_RESERVATION_TYPE,
+		reservationType: ONLYHOTEL_API_CONFIG.DEFAULT_RESERVATION_TYPE,
 		paging: {
 			pageNumber: 1,
 			pageSize: API_CONFIG.DEFAULT_PAGE_SIZE,
 			sortType: API_CONFIG.DEFAULT_SORT_TYPE,
 		},
-		additionalFilters: addFilters(filters),
+		additionalFilters: addFilters(filters, "onlyhotel"),
 		imageSizes: [...API_CONFIG.DEFAULT_IMAGE_SIZES],
 		categories: [],
 	};

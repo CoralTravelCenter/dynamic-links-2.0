@@ -1,4 +1,8 @@
-import { ArrivalLocation, OnlyHotelArrivalLocationResponse, LocationType } from "../types";
+import {
+	ArrivalLocation,
+	OnlyHotelArrivalLocationResponse,
+	LocationType,
+} from "../types";
 import { doRequestToServer, ONLY_HOTEL_ENDPOINTS } from "../api";
 import { filterUniqueMatchingHotels } from "./filterUniqueMatchingHotels";
 import { LOCATION_TYPES } from "../constants";
@@ -43,7 +47,9 @@ function mapHotelLocation(item: ArrivalLocation): ArrivalLocation {
  * @returns Promise, разрешающийся в массив обработанных локаций прибытия
  * @throws Error если API запрос не удался или не найдены валидные локации
  */
-export async function fetchOnlyHotelLocations(hotelNames: string[]): Promise<ArrivalLocation[]> {
+export async function fetchOnlyHotelLocations(
+	hotelNames: string[],
+): Promise<ArrivalLocation[]> {
 	if (!hotelNames.length) {
 		throw new Error("Hotel names array cannot be empty");
 	}
@@ -51,7 +57,10 @@ export async function fetchOnlyHotelLocations(hotelNames: string[]): Promise<Arr
 	// Выполняем параллельные API запросы для каждого названия отеля
 	const responses = await Promise.all(
 		hotelNames.map((name) =>
-			doRequestToServer<OnlyHotelArrivalLocationResponse, { text: string }>(
+			doRequestToServer<
+				OnlyHotelArrivalLocationResponse,
+				{ text: string }
+			>(
 				ONLY_HOTEL_ENDPOINTS.LIST_ARRIVAL_LOCATIONS,
 				{ text: name.trim() },
 				"POST",
@@ -59,7 +68,10 @@ export async function fetchOnlyHotelLocations(hotelNames: string[]): Promise<Arr
 		),
 	);
 
-	const uniqueLocations: ArrivalLocation[] = filterUniqueMatchingHotels(responses, hotelNames);
+	const uniqueLocations: ArrivalLocation[] = filterUniqueMatchingHotels(
+		responses,
+		hotelNames,
+	);
 
 	// Обрабатываем локации на основе их типа
 	const processedLocations: ArrivalLocation[] = [];

@@ -1,104 +1,100 @@
-import { Filter, ReservationTypeParam } from "./types";
+import { ReservationTypeParam } from "./types";
 
-// Default search parameters
-export const defaultDepthDays: number = 14;
-export const defaultNights: number = 7;
+// Параметры поиска по умолчанию
+export const defaultDepthDays: number = 14; // Количество дней для поиска вперед по умолчанию
+export const defaultNights: number = 7; // Количество ночей проживания по умолчанию
 
-// DOM selectors
+// CSS селекторы для поиска элементов в DOM
 export const DOM_SELECTORS = {
-	HEADER_CONTAINER: ".header-client-side-desktop",
-	TEST_BUTTON: ".test-btn",
-	TEST_BUTTONS_CONTAINER: ".test-buttons-container",
+	HEADER_CONTAINER: ".header-client-side-desktop", // Контейнер заголовка для десктопа
+	TEST_BUTTON: ".test-btn", // Кнопка для тестирования
+	TEST_BUTTONS_CONTAINER: ".test-buttons-container", // Контейнер с тестовыми кнопками
 } as const;
 
-// HTML attributes for OnlyHotel functionality
+// HTML атрибуты для общей функциональности
 export const HTML_ATTRIBUTES = {
-	DESTINATION: "data-onlyhotel-lookup-destination-2",
-	DEPTH_DAYS: "data-onlyhotel-lookup-depth-days-2",
-	NIGHTS: "data-onlyhotel-lookup-nights-2",
-	FILTER: "data-onlyhotel-lookup-filter-2",
+	DESTINATION: "data-lookup-destination", // Атрибут для хранения направления поиска
+	DEPTH_DAYS: "data-lookup-depth-days", // Атрибут для количества дней поиска
+	NIGHTS: "data-lookup-nights", // Атрибут для количества ночей
+	FILTER: "data-lookup-filter", // Атрибут для фильтров поиска
 } as const;
 
-// Location types
+// Типы локаций для поиска
 export const LOCATION_TYPES = {
-	COUNTRY: 0,
-	HOTEL: 7,
+	COUNTRY: 0, // Тип локации: страна
+	HOTEL: 7, // Тип локации: отель
 } as const;
 
-// API configuration
+// Типы фильтров для поиска отелей
+export const FILTER_TYPES = {
+	availability: 21, // Фильтр по доступности
+	meal: 5, // Фильтр по типу питания
+	hotelConcept: 3, // Фильтр по концепции отеля
+	hotelCategory: 2, // Фильтр по категории отеля (звездность)
+	distanceToBeach: 25, // Фильтр по расстоянию до пляжа
+};
+
+// Конфигурация для API запросов
 export const API_CONFIG = {
-	TIMEOUT: 30000,
-	DEFAULT_PAGE_SIZE: 20,
-	DEFAULT_SORT_TYPE: 0,
-	DEFAULT_RESERVATION_TYPE: 2,
-	DEFAULT_IMAGE_SIZES: [0],
+	DEFAULT_PAGE_SIZE: 20, // Размер страницы по умолчанию для пагинации
+	DEFAULT_SORT_TYPE: 0, // Тип сортировки по умолчанию
+	DEFAULT_RESERVATION_TYPE: 2, // Тип бронирования по умолчанию
+	DEFAULT_IMAGE_SIZES: [0], // Размеры изображений по умолчанию
 	DEFAULT_PASSENGERS: [
-		{ age: 20, passengerType: 0 },
-		{ age: 20, passengerType: 0 },
+		// Пассажиры по умолчанию (2 взрослых)
+		{ age: 20, passengerType: 0 }, // Первый пассажир: возраст 20, тип "взрослый"
+		{ age: 20, passengerType: 0 }, // Второй пассажир: возраст 20, тип "взрослый"
 	],
 } as const;
 
-export const filters: Record<string, Filter> = {
-	available: {
-		type: 21,
-		values: [{ id: "2", value: "2", parent: null }],
-		providers: null,
-	},
-	ai: {
-		type: 5,
-		values: [
-			{ id: "1", value: "1", parent: null },
-			{ id: "2", value: "2", parent: null },
-		],
-		providers: [],
-	},
-	elite: {
-		type: 3,
-		values: [
-			{ id: "49", value: "49", parent: null },
-			{ id: "1", value: "1", parent: null },
-		],
-		providers: null,
-	},
-	family: {
-		type: 3,
-		values: [{ id: "5", value: "5", parent: null }],
-		providers: null,
-	},
-	"50m": {
-		type: 25,
-		values: [{ id: "0-50", value: "0-50", parent: null }],
-		providers: null,
-	},
-	"250m": {
-		type: 25,
-		values: [{ id: "50-250", value: "50-250", parent: null }],
-		providers: null,
-	},
-	"5stars": {
-		type: 2,
-		values: [{ id: "5", value: "5", parent: null }],
-		providers: null,
-	},
-	"4stars": {
-		type: 2,
-		values: [{ id: "4", value: "4", parent: null }],
-		providers: null,
-	},
-	"3stars": {
-		type: 2,
-		values: [{ id: "3", value: "3", parent: null }],
-		providers: null,
-	},
-	privatebeach: {
-		type: 6,
-		values: [{ id: "32", value: "32", parent: null }],
-		providers: null,
-		parent: [{ id: "3", value: "3", parent: null, providers: [] }],
-	},
-};
+// Константы для города отправления
+export const DEPARTURE_ID = "2671-5";
+export const DEPARTURE_FRIENDLY = "moskva";
 
+// Объект с регионами прибытия для пакетных туров
+export const arrivalRegionsObject = {
+	["Турция"]: ["1-0", "turtsiya"],
+	["ОАЭ"]: ["31-0", "oae"],
+	["Египет"]: ["12-0", "egipet"],
+	["Вьетнам"]: ["41-0", "vyetnam"],
+	["Куба"]: ["48-0", "kuba"],
+	["Маврикий"]: ["63-0", "mavrikiy"],
+	["Малайзия"]: ["118-0", "malayziya"],
+	["Мальдивы"]: ["35-0", "malydivy"],
+	["Марокко"]: ["45-0", "marokko"],
+	["Мексика"]: ["98-0", "meksika"],
+	["Россия"]: ["3-0", "rossiya"],
+	["Таиланд"]: ["33-0", "tailand"],
+	["Танзания"]: ["60-0", "tanzaniya"],
+	["Тунис"]: ["34-0", "tunis"],
+	["Узбекистан"]: ["49-0", "uzbekistan"],
+	["Филиппины"]: ["251-0", "filippiny"],
+	["Шри-Ланка"]: ["40-0", "shrilanka"],
+	["Азербайджан"]: ["7-0", "azerbaydzhan"],
+	["Армения"]: ["5-0", "armeniya"],
+	["Бахрейн"]: ["282-0", "bahreyn"],
+	["Беларусь"]: ["8-0", "belarus"],
+	["Болгария"]: ["10-0", "bolgariya"],
+	["Грузия"]: ["15-0", "gruziya"],
+	["Доминиканская Республика"]: ["36-0", "dominikanskayarespublika"],
+	["Индия"]: ["52-0", "indiya"],
+	["Греция"]: ["43-0", "gretsiya"],
+	["Абхазия"]: ["278-0", "abhaziya"],
+	["Андорра"]: ["72-0", "andorra"],
+	["Иордания"]: ["58-0", "iordaniya"],
+	["Испания"]: ["112-3-42_72", "barselona"],
+	["Индонезия"]: ["38-0", "indoneziya"],
+	["Италия"]: ["18-0", "italiya"],
+	["Казахстан"]: ["19-0", "kazahstan"],
+	["Кипр"]: ["216-0", "kipr"],
+	["Китай"]: ["37-0", "kitay"],
+	["Сейшелы"]: ["39-0", "seyshely"],
+	["Черногория"]: ["80-0", "chernogoriya"],
+	["Хорватия"]: ["108-0", "horvatiya"],
+} as const;
+
+// Параметры URL для различных типов бронирования
 export const reservationTypeParam: ReservationTypeParam = {
-	onlyHotel: "&p=2&w=0&s=0",
-	package: "&p=1&w=0&s=0",
+	onlyHotel: "&p=2&w=0&s=0", // Параметры для бронирования только отеля
+	package: "&p=1&w=0&s=0", // Параметры для пакетного тура (отель + перелет)
 };

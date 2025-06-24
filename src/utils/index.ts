@@ -1,9 +1,6 @@
-import { filters } from "./constants";
-import { Filter } from "./types";
+import { onlyHotelFiltersMap, packageFiltersMap } from "../constants";
+import { Filter } from "../types";
 
-// Default React app selector
-const DEFAULT_REACT_SELECTOR = "#__next > div";
-const DEFAULT_CHECK_INTERVAL = 200;
 const DATE_FORMAT_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
@@ -15,13 +12,16 @@ const DATE_FORMAT_REGEX = /^\d{4}-\d{2}-\d{2}$/;
  * @returns Promise, который разрешается когда React приложение готово
  */
 export async function hostReactAppReady(
-	selector: string = DEFAULT_REACT_SELECTOR,
-	timeout: number = DEFAULT_CHECK_INTERVAL,
+	selector: string = "#__next > div",
+	timeout: number = 200,
 ): Promise<void> {
 	return new Promise((resolve) => {
 		const checkReady = (): void => {
 			const element = document.querySelector(selector);
-			if (element instanceof HTMLElement && element.getBoundingClientRect().height > 0) {
+			if (
+				element instanceof HTMLElement &&
+				element.getBoundingClientRect().height > 0
+			) {
 				resolve();
 			} else {
 				setTimeout(checkReady, timeout);
@@ -58,14 +58,21 @@ export function isValidDateFormat(dateString: string): boolean {
  * Парсит строку фильтров и возвращает массив объектов Filter
  *
  * @param filterStr - Ключи фильтров через запятую или null
+ * @param filterType - Тип фильтров ("onlyhotel" или "package")
  * @returns Массив объектов Filter, соответствующих запрошенным ключам
  */
-export function addFilters(filterStr: string | null): Filter[] {
+export function addFilters(
+	filterStr: string | null,
+	filterType: "onlyhotel" | "package" = "onlyhotel",
+): Filter[] {
 	const result: Filter[] = [];
 
 	if (!filterStr || typeof filterStr !== "string") {
 		return result;
 	}
+
+	const filtersMap =
+		filterType === "package" ? packageFiltersMap : onlyHotelFiltersMap;
 
 	const requestedFilters = filterStr
 		.split(",")
@@ -73,8 +80,8 @@ export function addFilters(filterStr: string | null): Filter[] {
 		.filter(Boolean);
 
 	for (const filterKey of requestedFilters) {
-		if (filters[filterKey]) {
-			result.push(filters[filterKey]);
+		if (filtersMap[filterKey]) {
+			result.push(filtersMap[filterKey]);
 		}
 	}
 
