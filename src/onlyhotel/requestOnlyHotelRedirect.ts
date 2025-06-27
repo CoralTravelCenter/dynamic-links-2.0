@@ -1,6 +1,6 @@
 import { fetchOnlyHotelLocations } from "./fetchOnlyHotelArrivalLocations";
 import { fetchPriceSearchEncrypt } from "./fetchPriceSearchEncrypt";
-import { reservationTypeParam } from "../constants";
+import { onlyHotelReservationParam } from "../constants";
 
 /**
  * Запрашивает URL для редиректа OnlyHotel, получая локации и генерируя зашифрованный поисковый запрос
@@ -27,13 +27,20 @@ export async function requestOnlyHotelRedirect(
 	}
 
 	const locations = await fetchOnlyHotelLocations(hotelNames);
-	const searchResponse = await fetchPriceSearchEncrypt(locations, dates, nights, filters);
+	const searchResponse = await fetchPriceSearchEncrypt(
+		locations,
+		dates,
+		nights,
+		filters,
+	);
 
 	const { redirectionUrl, queryParam } = searchResponse.result;
 
 	if (!redirectionUrl || !queryParam) {
-		throw new Error("Invalid response: missing redirection URL or query parameter");
+		throw new Error(
+			"Invalid response: missing redirection URL or query parameter",
+		);
 	}
 
-	return `${redirectionUrl}?qp=${queryParam}${reservationTypeParam.onlyHotel}`;
+	return `${redirectionUrl}?qp=${queryParam}${onlyHotelReservationParam}`;
 }

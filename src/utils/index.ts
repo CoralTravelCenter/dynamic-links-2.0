@@ -1,7 +1,5 @@
-import { onlyHotelFiltersMap, packageFiltersMap } from "../constants";
-import { Filter } from "../types";
-
-const DATE_FORMAT_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+import {FILTERS_MAP} from "../constants";
+import {Filter} from "../types";
 
 /**
  * Ожидает готовности React приложения, проверяя, что указанный элемент
@@ -12,80 +10,54 @@ const DATE_FORMAT_REGEX = /^\d{4}-\d{2}-\d{2}$/;
  * @returns Promise, который разрешается когда React приложение готово
  */
 export async function hostReactAppReady(
-	selector: string = "#__next > div",
-	timeout: number = 200,
+    selector: string = "#__next > div",
+    timeout: number = 200,
 ): Promise<void> {
-	return new Promise((resolve) => {
-		const checkReady = (): void => {
-			const element = document.querySelector(selector);
-			if (
-				element instanceof HTMLElement &&
-				element.getBoundingClientRect().height > 0
-			) {
-				resolve();
-			} else {
-				setTimeout(checkReady, timeout);
-			}
-		};
-		checkReady();
-	});
-}
-
-/**
- * Форматирует объект Date в строку формата YYYY-MM-DD
- *
- * @param date - Объект Date для форматирования
- * @returns Отформатированная строка даты в формате YYYY-MM-DD
- */
-export function formatDate(date: Date): string {
-	if (!(date instanceof Date) || isNaN(date.getTime())) {
-		throw new Error("Invalid date provided to formatDate");
-	}
-	return date.toISOString().split("T")[0];
-}
-
-/**
- * Проверяет, соответствует ли строка формату YYYY-MM-DD
- *
- * @param dateString - Строка даты для проверки
- * @returns True если формат даты валидный, иначе false
- */
-export function isValidDateFormat(dateString: string): boolean {
-	return DATE_FORMAT_REGEX.test(dateString);
+    return new Promise((resolve) => {
+        const checkReady = (): void => {
+            const element = document.querySelector(selector);
+            if (
+                element instanceof HTMLElement &&
+                element.getBoundingClientRect().height > 0
+            ) {
+                resolve();
+            } else {
+                setTimeout(checkReady, timeout);
+            }
+        };
+        checkReady();
+    });
 }
 
 /**
  * Парсит строку фильтров и возвращает массив объектов Filter
  *
  * @param filterStr - Ключи фильтров через запятую или null
- * @param filterType - Тип фильтров ("onlyhotel" или "package")
  * @returns Массив объектов Filter, соответствующих запрошенным ключам
  */
 export function addFilters(
-	filterStr: string | null,
-	filterType: "onlyhotel" | "package" = "onlyhotel",
+    filterStr: string | null,
 ): Filter[] {
-	const result: Filter[] = [];
+    const result: Filter[] = [];
 
-	if (!filterStr || typeof filterStr !== "string") {
-		return result;
-	}
+    if (!filterStr) {
+        return result;
+    }
 
-	const filtersMap =
-		filterType === "package" ? packageFiltersMap : onlyHotelFiltersMap;
+    const filtersMap = FILTERS_MAP
 
-	const requestedFilters = filterStr
-		.split(",")
-		.map((filter) => filter.trim().toLowerCase())
-		.filter(Boolean);
+    const requestedFilters = filterStr
+        .split(",")
+        .map((filter) => filter.trim().toLowerCase())
+        .filter(Boolean);
 
-	for (const filterKey of requestedFilters) {
-		if (filtersMap[filterKey]) {
-			result.push(filtersMap[filterKey]);
-		}
-	}
+    for (const filterKey of requestedFilters) {
+        if (filtersMap[filterKey]) {
+            result.push(filtersMap[filterKey]);
+        }
+    }
 
-	return result;
+    return result;
 }
 
 /**
@@ -96,8 +68,47 @@ export function addFilters(
  * @returns Распарсенное целое число или значение по умолчанию
  */
 export function parseIntSafe(value: string | null, fallback: number): number {
-	if (!value) return fallback;
+    if (!value) return fallback;
 
-	const parsed = parseInt(value, 10);
-	return isNaN(parsed) ? fallback : parsed;
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? fallback : parsed;
+}
+
+/**
+ * Вычисляет даты начала и окончания поездки на основе глубины поиска и количества ночей
+ *
+ * @param depth - Количество дней вперед от текущей даты для начала поиска
+ * @param nights - Количество ночей проживания
+ * @returns Кортеж с датами начала и окончания в формате YYYY-MM-DD
+ * @throws Error если параметры невалидные
+ */
+export function calculateDates(
+    depth: number,
+    nights: number,
+): [string, string] {
+    if (depth < 0) {
+        throw new Error("Depth cannot be negative");
+    }
+
+    if (nights <= 0) {
+        throw new Error("Nights must be a positive number");
+    }
+
+    const today = new Date();
+
+    // Дата начала поездки (сегодня + depth дней)
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() + depth);
+
+    // Дата окончания поездки (дата начала + nights дней)
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + nights);
+
+    // Форматируем даты в формат YYYY-MM-DD
+    const formatDate = (date: Date): string => {
+        const ISODate = date.toISOString();
+        return ISODate.split("T")[0]
+    };
+
+    return [formatDate(startDate), formatDate(endDate)];
 }

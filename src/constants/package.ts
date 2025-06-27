@@ -7,10 +7,10 @@ export const PACKAGE_API_CONFIG = {
 
 // HTML атрибуты для функциональности пакетных туров
 export const PACKAGE_HTML_ATTRIBUTES = {
-	DESTINATION: "data-package-destination", // Атрибут для хранения направления поиска
-	DEPTH_DAYS: "data-package-depth-days", // Атрибут для количества дней поиска
-	NIGHTS: "data-package-nights", // Атрибут для количества ночей
-	FILTER: "data-package-filter", // Атрибут для фильтров поиска
+	DESTINATION: "data-lookup-destination", // Атрибут для хранения направления поиска
+	DEPTH_DAYS: "data-lookup-depth-days", // Атрибут для количества дней поиска
+	NIGHTS: "data-lookup-nights", // Атрибут для количества ночей
+	FILTER: "data-lookup-filter", // Атрибут для фильтров поиска
 } as const;
 
 // Объект с регионами прибытия для пакетных туров
