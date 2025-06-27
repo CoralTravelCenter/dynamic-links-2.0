@@ -1,10 +1,10 @@
 import {doRequestToServer, ONLY_HOTEL_ENDPOINTS} from "../api";
 import {API_CONFIG, ONLYHOTEL_API_CONFIG} from "../constants";
 import {
-	ArrivalLocation,
-	isHotelLocation,
-	OnlyHotelPriceSearchEncryptPayload,
-	OnlyHotelPriceSearchEncryptResponse,
+    ArrivalLocation,
+    isHotelLocation,
+    OnlyHotelPriceSearchEncryptPayload,
+    OnlyHotelPriceSearchEncryptResponse,
 } from "../types";
 import {addFilters} from "../utils";
 
@@ -49,6 +49,7 @@ function buildPayloadForCountry(
     nights: number,
     filters: string | null,
 ): OnlyHotelPriceSearchEncryptPayload {
+    const isAdditionalFilters = filters !== null ? addFilters(filters) : [];
     return {
         beginDates: dates,
         arrivalLocations: locations,
@@ -64,7 +65,7 @@ function buildPayloadForCountry(
             pageSize: API_CONFIG.DEFAULT_PAGE_SIZE,
             sortType: API_CONFIG.DEFAULT_SORT_TYPE,
         },
-        additionalFilters: addFilters(filters, "onlyhotel"),
+        additionalFilters: isAdditionalFilters,
         imageSizes: [...API_CONFIG.DEFAULT_IMAGE_SIZES],
         categories: [],
     };
