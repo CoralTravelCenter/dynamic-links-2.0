@@ -1,4 +1,5 @@
 import {extractOnlyHotelParams} from "./extractOnlyHotelParams";
+
 import {redirectToOnlyHotel} from "./redirectToOnlyHotel";
 import {calculateDates} from "../utils";
 

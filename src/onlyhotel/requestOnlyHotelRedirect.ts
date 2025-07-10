@@ -1,6 +1,6 @@
-import { fetchOnlyHotelLocations } from "./fetchOnlyHotelArrivalLocations";
-import { fetchPriceSearchEncrypt } from "./fetchPriceSearchEncrypt";
-import { onlyHotelReservationParam } from "../constants";
+import {fetchOnlyHotelLocations} from "./fetchOnlyHotelArrivalLocations";
+import {fetchPriceSearchEncrypt} from "./fetchPriceSearchEncrypt";
+import {RESERVATION_TYPE_PARAMS} from "../constants";
 
 /**
  * Запрашивает URL для редиректа OnlyHotel, получая локации и генерируя зашифрованный поисковый запрос
@@ -13,34 +13,27 @@ import { onlyHotelReservationParam } from "../constants";
  * @throws Error если не удается получить локации или зашифровать поиск
  */
 export async function requestOnlyHotelRedirect(
-	hotelNames: string[],
-	dates: string[],
-	nights: number,
-	filters: string | null,
+    hotelNames: string[],
+    dates: string[],
+    nights: number,
+    filters: string | null,
 ): Promise<string> {
-	if (!hotelNames.length) {
-		throw new Error("Hotel names array cannot be empty");
-	}
+    if (!hotelNames.length) {
+        throw new Error("Hotel names array cannot be empty");
+    }
 
-	if (!dates.length) {
-		throw new Error("Dates array cannot be empty");
-	}
+    if (!dates.length) {
+        throw new Error("Dates array cannot be empty");
+    }
 
-	const locations = await fetchOnlyHotelLocations(hotelNames);
-	const searchResponse = await fetchPriceSearchEncrypt(
-		locations,
-		dates,
-		nights,
-		filters,
-	);
+    const locations = await fetchOnlyHotelLocations(hotelNames);
+    const searchResponse = await fetchPriceSearchEncrypt(locations, dates, nights, filters);
 
-	const { redirectionUrl, queryParam } = searchResponse.result;
+    const {redirectionUrl, queryParam} = searchResponse.result;
 
-	if (!redirectionUrl || !queryParam) {
-		throw new Error(
-			"Invalid response: missing redirection URL or query parameter",
-		);
-	}
+    if (!redirectionUrl || !queryParam) {
+        throw new Error("Invalid response: missing redirection URL or query parameter");
+    }
 
-	return `${redirectionUrl}?qp=${queryParam}${onlyHotelReservationParam}`;
+    return `${redirectionUrl}?qp=${queryParam}${RESERVATION_TYPE_PARAMS.onlyHotel}`;
 }
