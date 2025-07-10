@@ -1,10 +1,5 @@
-import { filters } from "./constants";
-import { Filter } from "./types";
-
-// Default React app selector
-const DEFAULT_REACT_SELECTOR = "#__next > div";
-const DEFAULT_CHECK_INTERVAL = 200;
-const DATE_FORMAT_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+import {FILTERS} from "./constants";
+import {ArrivalLocation, Filter, OnlyHotelArrivalLocationResponse, PackageArrivalLocationResponse} from "./types";
 
 /**
  * Ожидает готовности React приложения, проверяя, что указанный элемент
@@ -15,20 +10,20 @@ const DATE_FORMAT_REGEX = /^\d{4}-\d{2}-\d{2}$/;
  * @returns Promise, который разрешается когда React приложение готово
  */
 export async function hostReactAppReady(
-	selector: string = DEFAULT_REACT_SELECTOR,
-	timeout: number = DEFAULT_CHECK_INTERVAL,
+    selector: string = "#__next > div",
+    timeout: number = 200,
 ): Promise<void> {
-	return new Promise((resolve) => {
-		const checkReady = (): void => {
-			const element = document.querySelector(selector);
-			if (element instanceof HTMLElement && element.getBoundingClientRect().height > 0) {
-				resolve();
-			} else {
-				setTimeout(checkReady, timeout);
-			}
-		};
-		checkReady();
-	});
+    return new Promise((resolve) => {
+        const checkReady = (): void => {
+            const element = document.querySelector(selector);
+            if (element instanceof HTMLElement && element.getBoundingClientRect().height > 0) {
+                resolve();
+            } else {
+                setTimeout(checkReady, timeout);
+            }
+        };
+        checkReady();
+    });
 }
 
 /**
@@ -38,20 +33,10 @@ export async function hostReactAppReady(
  * @returns Отформатированная строка даты в формате YYYY-MM-DD
  */
 export function formatDate(date: Date): string {
-	if (!(date instanceof Date) || isNaN(date.getTime())) {
-		throw new Error("Invalid date provided to formatDate");
-	}
-	return date.toISOString().split("T")[0];
-}
-
-/**
- * Проверяет, соответствует ли строка формату YYYY-MM-DD
- *
- * @param dateString - Строка даты для проверки
- * @returns True если формат даты валидный, иначе false
- */
-export function isValidDateFormat(dateString: string): boolean {
-	return DATE_FORMAT_REGEX.test(dateString);
+    if (isNaN(date.getTime())) {
+        throw new Error("Invalid date provided to formatDate");
+    }
+    return date.toISOString().split("T")[0];
 }
 
 /**
@@ -61,24 +46,24 @@ export function isValidDateFormat(dateString: string): boolean {
  * @returns Массив объектов Filter, соответствующих запрошенным ключам
  */
 export function addFilters(filterStr: string | null): Filter[] {
-	const result: Filter[] = [];
+    const result: Filter[] = [];
 
-	if (!filterStr || typeof filterStr !== "string") {
-		return result;
-	}
+    if (!filterStr) {
+        return result;
+    }
 
-	const requestedFilters = filterStr
-		.split(",")
-		.map((filter) => filter.trim().toLowerCase())
-		.filter(Boolean);
+    const requestedFilters = filterStr
+        .split(",")
+        .map((filter) => filter.trim().toLowerCase())
+        .filter(Boolean);
 
-	for (const filterKey of requestedFilters) {
-		if (filters[filterKey]) {
-			result.push(filters[filterKey]);
-		}
-	}
+    for (const filterKey of requestedFilters) {
+        if (FILTERS[filterKey]) {
+            result.push(FILTERS[filterKey]);
+        }
+    }
 
-	return result;
+    return result;
 }
 
 /**
@@ -89,8 +74,74 @@ export function addFilters(filterStr: string | null): Filter[] {
  * @returns Распарсенное целое число или значение по умолчанию
  */
 export function parseIntSafe(value: string | null, fallback: number): number {
-	if (!value) return fallback;
+    if (!value) return fallback;
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? fallback : parsed;
+}
 
-	const parsed = parseInt(value, 10);
-	return isNaN(parsed) ? fallback : parsed;
+/**
+ * Вычисляет даты начала и окончания поездки на основе глубины и продолжительности
+ *
+ * @param depth - Количество дней от сегодня до начала поездки
+ * @param nights - Количество ночей для продолжительности поездки
+ * @returns Кортеж содержащий [startDate, endDate] в формате YYYY-MM-DD
+ * @throws Error если depth или nights невалидные
+ */
+export function calculateDates(depth: number, nights: number): [string, string] {
+    // Валидация входных параметров
+    if (!Number.isInteger(depth) || depth < 0) {
+        throw new Error("Depth must be a non-negative integer");
+    }
+
+    if (!Number.isInteger(nights) || nights <= 0) {
+        throw new Error("Nights must be a positive integer");
+    }
+
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() + depth);
+
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + nights);
+
+    return [formatDate(startDate), formatDate(endDate)];
+}
+
+/**
+ * Фильтрует список ArrivalLocation, извлекая только те,
+ * которые точно совпадают по имени с заданным списком,
+ * и удаляет дубликаты по ID.
+ *
+ * @param {OnlyHotelArrivalLocationResponse[] | PackageArrivalLocationResponse[]} responses
+ *   Список ответов API, каждый из которых содержит массив locations.
+ *
+ * @param {string[]} requestedNames
+ *   Список названий локаций, которые нужно найти (без учёта регистра и лишних пробелов).
+ *
+ * @returns {ArrivalLocation[]}
+ *   Массив уникальных ArrivalLocation, у которых имя совпало с одним из requestedNames.
+ */
+export function filterUniqueMatchingHotels(
+    responses: OnlyHotelArrivalLocationResponse[] | PackageArrivalLocationResponse[],
+    requestedNames: string[]
+): ArrivalLocation[] {
+    if (!responses?.length || !requestedNames?.length) return [];
+
+    const requestedSet = new Set(
+        requestedNames.map(name => name.trim().toUpperCase()).filter(Boolean)
+    );
+    if (!requestedSet.size) return [];
+
+    const uniqueMap = new Map<string, ArrivalLocation>();
+
+    for (const response of responses) {
+        for (const location of response?.result?.locations || []) {
+            const normalizedName = location.name.trim().toUpperCase();
+            if (requestedSet.has(normalizedName)) {
+                uniqueMap.set(location.id, location);
+            }
+        }
+    }
+
+    return [...uniqueMap.values()];
 }
