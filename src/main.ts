@@ -1,7 +1,6 @@
 import {hostReactAppReady} from "./utils";
 import {handleOnlyHotelClick} from "./onlyhotel/handleOnlyHotelClick";
-import {handlePackageClick} from "./package/handlePackageClick";
-import {DOM_SELECTORS, HTML_ATTRIBUTES} from "./constants";
+import {DOM_SELECTORS, ONLYHOTEL_HTML_ATTRIBUTES, PACKAGE_HTML_ATTRIBUTES} from "./constants";
 
 /**
  * Конфигурация тестовой кнопки
@@ -19,17 +18,22 @@ interface TestButtonConfig {
  */
 function createTestButtonsHTML(buttons: TestButtonConfig[]): string {
     const buttonsHTML = buttons
-        .map(
-            (button) => `
+        .map((button) => {
+            const isOnlyHotel = button.type === "onlyhotel" || !button.type;
+            const attributes = isOnlyHotel
+                ? ONLYHOTEL_HTML_ATTRIBUTES
+                : PACKAGE_HTML_ATTRIBUTES;
+
+            return `
         <a href="#"
            class="test-btn ${button.className || ""}"
-           ${HTML_ATTRIBUTES.DESTINATION}="${button.destination}"
-           ${button.filter ? `${HTML_ATTRIBUTES.FILTER}="${button.filter}"` : ""}
-           ${button.type ? `data-type="${button.type}"` : ""}
+           ${attributes.DESTINATION}="${button.destination}"
+           ${button.filter ? `${attributes.FILTER}="${button.filter}"` : ""}
+           data-button-type="${button.type || "onlyhotel"}"
            >
            ${button.text}
-        </a>`,
-        )
+        </a>`;
+        })
         .join("");
 
     return `
@@ -41,7 +45,7 @@ function createTestButtonsHTML(buttons: TestButtonConfig[]): string {
 /**
  * Инициализирует тестовые кнопки и обработчики событий
  */
-async function initializeOnlyHotelApp(): Promise<void> {
+async function initializeDynamicLinksApp(): Promise<void> {
     try {
         // Ждем готовности React приложения
         await hostReactAppReady();
@@ -50,24 +54,33 @@ async function initializeOnlyHotelApp(): Promise<void> {
         const testButtons: TestButtonConfig[] = [
             {
                 text: "5★ Отели",
-                destination: "SUUM BODRUM HOTEL & BEACH, PRIVE BODRUM HOTEL",
-                type: "onlyhotel"
+                destination: "Турция",
+                filter: "",
+                type: "onlyhotel",
             },
             {
-                text: "Пакетный тур в Турцию",
+                text: "Пакетные туры в Турцию",
                 destination: "Турция",
+                filter: "available",
                 type: "package",
             },
         ];
 
         // Вставляем тестовые кнопки в header
-        const headerElement = document.querySelector(DOM_SELECTORS.HEADER_CONTAINER);
+        const headerElement = document.querySelector(
+            DOM_SELECTORS.HEADER_CONTAINER,
+        );
         if (headerElement) {
-            headerElement.insertAdjacentHTML("afterbegin", createTestButtonsHTML(testButtons));
+            headerElement.insertAdjacentHTML(
+                "afterbegin",
+                createTestButtonsHTML(testButtons),
+            );
         }
 
         // Добавляем обработчики событий к тестовым кнопкам
-        const testButtonElements = document.querySelectorAll(DOM_SELECTORS.TEST_BUTTON);
+        const testButtonElements = document.querySelectorAll(
+            DOM_SELECTORS.TEST_BUTTON,
+        );
         testButtonElements.forEach((button) => {
             button.addEventListener("click", handleButtonClick);
         });
@@ -87,14 +100,14 @@ function handleButtonClick(event: Event): void {
         return;
     }
 
-    const type = target.getAttribute("data-type");
+    const buttonType = target.getAttribute("data-button-type") || "onlyhotel";
 
-    if (type === "package") {
-        handlePackageClick(target);
+    if (buttonType === "package") {
+        console.log('package')
     } else {
         handleOnlyHotelClick(target);
     }
 }
 
 // Инициализируем приложение
-initializeOnlyHotelApp();
+initializeDynamicLinksApp();
