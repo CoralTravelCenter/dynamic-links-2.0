@@ -3,34 +3,31 @@ import {fetchPriceSearchEncrypt} from "./fetchPriceSearchEncrypt";
 import {RESERVATION_TYPE_PARAMS} from "../constants";
 
 /**
- * Запрашивает URL для редиректа OnlyHotel, получая локации и генерируя зашифрованный поисковый запрос
- *
- * @param hotelNames - Массив названий отелей для поиска
- * @param dates - Массив дат поиска в формате YYYY-MM-DD
- * @param nights - Количество ночей для проживания
- * @param filters - Опциональная строка фильтров через запятую
- * @returns Promise, разрешающийся в полный URL редиректа с параметрами запроса
- * @throws Error если не удается получить локации или зашифровать поиск
+ * Генерирует URL редиректа OnlyHotel:
+ * 1) резолвит локации по отелям/стране,
+ * 2) шифрует запрос (server-side),
+ * 3) возвращает готовый URL с qp и типом бронирования.
  */
 export async function requestOnlyHotelRedirect(
     hotelNames: string[],
-    dates: string[],
+    dates: [string, string],
     nights: number,
-    filters: string | null,
+    filters: Record<string, unknown> | { raw: string } | null,
 ): Promise<string> {
-    if (!hotelNames.length) {
-        throw new Error("Hotel names array cannot be empty");
+    if (!Array.isArray(hotelNames) || hotelNames.length === 0) {
+        throw new Error("hotelNames array cannot be empty");
     }
-
-    if (!dates.length) {
-        throw new Error("Dates array cannot be empty");
+    if (!Array.isArray(dates) || dates.length !== 2 || !dates[0] || !dates[1]) {
+        throw new Error("dates must be a tuple ['YYYY-MM-DD','YYYY-MM-DD']");
+    }
+    if (!Number.isFinite(nights) || nights <= 0) {
+        throw new Error("nights must be a positive number");
     }
 
     const locations = await fetchOnlyHotelLocations(hotelNames);
     const searchResponse = await fetchPriceSearchEncrypt(locations, dates, nights, filters);
 
-    const {redirectionUrl, queryParam} = searchResponse.result;
-
+    const {redirectionUrl, queryParam} = searchResponse.result ?? {};
     if (!redirectionUrl || !queryParam) {
         throw new Error("Invalid response: missing redirection URL or query parameter");
     }

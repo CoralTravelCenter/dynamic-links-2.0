@@ -7,7 +7,6 @@ interface ParentLocation {
 
 export type LocationType = 0 | 7; // 0 = Country, 7 = Hotel
 export type ReservationType = 1 | 2; // 1 = Package, 2 = OnlyHotel
-export type PassengerType = 0 | 1; // 0 = Adult, 1 = Child
 
 interface Meta {
     responseDateTime: string; // ISO 8601
@@ -89,7 +88,7 @@ export interface ArrivalLocation {
     name: string;
     friendlyUrl: string;
     parent: ParentLocation;
-    children: any[];
+    children?: any[];
 }
 
 export interface OnlyHotelArrivalLocationPayload {
@@ -113,6 +112,7 @@ export interface OnlyHotelPriceSearchEncryptPayload {
     roomCriterias: RoomCriteria[];
     paging: Paging;
     imageSizes: number[];
+    searchSource: number;
     categories: Category[];
     additionalFilters: Filter[];
     arrivalLocations?: ArrivalLocation[];
@@ -121,10 +121,11 @@ export interface OnlyHotelPriceSearchEncryptPayload {
 
 // Search parameters extracted from DOM
 export interface OnlyHotelSearchParams {
-    hotelNames: string[];
-    depth: number;
-    nights: number;
-    filters: string | null;
+    destination: string[];
+    filters: Record<string, unknown> | { raw: string } | null;
+    period?: [string, string];
+    depth?: number;
+    nights?: number;
 }
 
 // Configuration for OnlyHotel button

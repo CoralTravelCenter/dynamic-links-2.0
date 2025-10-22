@@ -40,31 +40,47 @@ export function formatDate(date: Date): string {
 }
 
 /**
- * Парсит строку фильтров и возвращает массив объектов Filter
- *
- * @param filterStr - Ключи фильтров через запятую или null
- * @returns Массив объектов Filter, соответствующих запрошенным ключам
+ * Преобразует объект фильтров (например { stars: ['5stars','4stars'], price: '0-150000' })
+ * в массив Filter, всегда добавляя 'available' как базовый фильтр.
  */
-export function addFilters(filterStr: string | null): Filter[] {
+export function addFilters(filtersObj: Record<string, any>): Filter[] {
     const result: Filter[] = [];
 
-    if (!filterStr) {
+    // 1) всегда добавляем available
+    if (FILTERS.available) {
+        result.push(structuredClone(FILTERS.available));
+    }
+
+    if (!filtersObj || typeof filtersObj !== "object") {
         return result;
     }
 
-    const requestedFilters = filterStr
-        .split(",")
-        .map((filter) => filter.trim().toLowerCase())
-        .filter(Boolean);
+    for (const [key, value] of Object.entries(filtersObj)) {
+        const normalizedKey = key.toLowerCase();
 
-    for (const filterKey of requestedFilters) {
-        if (FILTERS[filterKey]) {
-            result.push(FILTERS[filterKey]);
+        // массивы — набор конкретных ключей из FILTERS (например, stars)
+        if (Array.isArray(value)) {
+            for (const v of value) {
+                const tpl = FILTERS[v.toLowerCase()];
+                if (tpl) result.push(structuredClone(tpl));
+            }
+            continue;
         }
+
+        // простые значения — подставляем в values[0].value, не мутируя словарь
+        const template = FILTERS[normalizedKey];
+        if (!template) continue;
+
+        const filter = structuredClone(template);
+        if (filter.values?.length) {
+            filter.values[0].value = typeof value === "string" ? value : String(value);
+        }
+        result.push(filter);
     }
 
     return result;
 }
+
 
 /**
  * Безопасно парсит строку в целое число с fallback значением
@@ -87,16 +103,7 @@ export function parseIntSafe(value: string | null, fallback: number): number {
  * @returns Кортеж содержащий [startDate, endDate] в формате YYYY-MM-DD
  * @throws Error если depth или nights невалидные
  */
-export function calculateDates(depth: number, nights: number): [string, string] {
-    // Валидация входных параметров
-    if (!Number.isInteger(depth) || depth < 0) {
-        throw new Error("Depth must be a non-negative integer");
-    }
-
-    if (!Number.isInteger(nights) || nights <= 0) {
-        throw new Error("Nights must be a positive integer");
-    }
-
+export function calculateDates(depth: number | undefined, nights: number | undefined): [string, string] {
     const today = new Date();
     const startDate = new Date(today);
     startDate.setDate(today.getDate() + depth);
@@ -144,4 +151,24 @@ export function filterUniqueMatchingHotels(
     }
 
     return [...uniqueMap.values()];
+}
+
+
+function normalizeJsonish(input: string): string {
+    let s = input.replace(/'/g, '"');
+    s = s.replace(/([{,]\s*)([A-Za-z0-9_]+)\s*:/g, '$1"$2":');
+    return s;
+}
+
+export function parseFilters(filtersAttr: string | null): Record<string, unknown> | null {
+    if (!filtersAttr) return null;
+    try {
+        return JSON.parse(filtersAttr);
+    } catch {
+    }
+    try {
+        return JSON.parse(normalizeJsonish(filtersAttr));
+    } catch {
+    }
+    return {raw: filtersAttr};
 }

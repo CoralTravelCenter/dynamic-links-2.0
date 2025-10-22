@@ -1,6 +1,5 @@
 import {ArrivalLocation, LocationType, OnlyHotelArrivalLocationResponse} from "../types";
 import {doRequestToServer, ONLY_HOTEL_ENDPOINTS} from "../api";
-
 import {LOCATION_TYPES} from "../constants";
 import {filterUniqueMatchingHotels} from "../utils";
 
@@ -14,7 +13,6 @@ function mapCountryLocation(item: ArrivalLocation): ArrivalLocation {
         friendlyUrl: item.friendlyUrl,
         type: item.type,
         parent: item.parent,
-        children: item.children || [],
     };
 }
 
@@ -23,33 +21,23 @@ function mapCountryLocation(item: ArrivalLocation): ArrivalLocation {
  */
 function mapHotelLocation(item: ArrivalLocation): ArrivalLocation {
     return {
-        id: item.id.split("-")[0], // Remove additional ID parts
-        type: item.type,
+        id: item.id,
         name: item.name,
         friendlyUrl: item.friendlyUrl,
-        parent: {
-            id: item.parent.id,
-            type: item.parent.type,
-            name: item.parent.name,
-            countryId: item.parent.countryId,
-        },
-        children: [],
+        type: item.type,
+        parent: item.parent,
     };
 }
 
 /**
- * Получает локации прибытия для OnlyHotel на основе названий отелей
- *
- * @param hotelNames - Массив названий отелей для поиска
- * @returns Promise, разрешающийся в массив обработанных локаций прибытия
- * @throws Error если API запрос не удался или не найдены валидные локации
+ * Получает локации для списка названий отелей/направлений.
+ * Возвращает уникальные и корректно типизированные локации (страна/отель).
  */
 export async function fetchOnlyHotelLocations(hotelNames: string[]): Promise<ArrivalLocation[]> {
-    if (!hotelNames.length) {
-        throw new Error("Hotel names array cannot be empty");
+    if (!Array.isArray(hotelNames) || hotelNames.length === 0) {
+        throw new Error("hotelNames must be a non-empty array");
     }
 
-    // Выполняем параллельные API запросы для каждого названия отеля
     const responses = await Promise.all(
         hotelNames.map((name) =>
             doRequestToServer<OnlyHotelArrivalLocationResponse, { text: string }>(
@@ -62,7 +50,6 @@ export async function fetchOnlyHotelLocations(hotelNames: string[]): Promise<Arr
 
     const uniqueLocations: ArrivalLocation[] = filterUniqueMatchingHotels(responses, hotelNames);
 
-    // Обрабатываем локации на основе их типа
     const processedLocations: ArrivalLocation[] = [];
 
     for (const location of uniqueLocations) {

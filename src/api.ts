@@ -1,23 +1,14 @@
 export const ONLY_HOTEL_ENDPOINTS = {
-    LIST_ARRIVAL_LOCATIONS: "/OnlyHotelProduct/ListArrivalLocations",
-    PRICE_SEARCH_ENCRYPT: "/OnlyHotelProduct/PriceSearchEncrypt",
+    LIST_ARRIVAL_LOCATIONS: "/endpoints/OnlyHotelProduct/ListArrivalLocations",
+    PRICE_SEARCH_ENCRYPT: "/endpoints/OnlyHotelProduct/PriceSearchEncrypt",
 } as const;
 
 export const PACKAGE_ENDPOINTS = {
-    LIST_ARRIVAL_LOCATIONS: "/PackageTourHotelProduct/ListArrivalLocations",
-    LIST_AVAILABLE_DATES: "/PackageTourHotelProduct/ListAvailableDates",
-    LIST_AVAILABLE_NIGHTS: "/PackageTourHotelProduct/ListAvailableNights",
-    PRICE_SEARCH_ENCRYPT: "/PackageTourHotelProduct/PriceSearchEncrypt",
+    LIST_ARRIVAL_LOCATIONS: "/endpoints/PackageTourHotelProduct/ListArrivalLocations",
+    LIST_AVAILABLE_DATES: "/endpoints/PackageTourHotelProduct/ListAvailableDates",
+    LIST_AVAILABLE_NIGHTS: "/endpoints/PackageTourHotelProduct/ListAvailableNights",
+    PRICE_SEARCH_ENCRYPT: "/endpoints/PackageTourHotelProduct/PriceSearchEncrypt",
 } as const;
-
-function endpointUrl(endpoint: string): string {
-    const isLocalhost = location.hostname === "localhost";
-    const host = isLocalhost
-        ? "http://localhost:8010/proxy"
-        : "//" + location.hostname.replace(/^(www|new)/, "b2capi");
-
-    return `${host}${endpoint}`;
-}
 
 export async function doRequestToServer<T, U>(
     endpoint: string,
@@ -25,7 +16,7 @@ export async function doRequestToServer<T, U>(
     method: "POST" | "GET" = "POST",
 ): Promise<T> {
     try {
-        const url = endpointUrl(endpoint);
+        const url = endpoint;
 
         console.log(`API Request: ${method} ${url}`, data ? {payload: data} : {});
 
